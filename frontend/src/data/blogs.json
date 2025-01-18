@@ -1,0 +1,31 @@
+[
+    {
+      "id": 1,
+      "title": "Why Vending Machines Are Still Popular",
+      "subtitle": "Timeless",
+      "date": "12th August 2022",
+      "imageUrl": "https://plus.unsplash.com/premium_photo-1661963304236-c564eb04e4a7?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    },
+    {
+      "id": 2,
+      "title": "Comfortable beds highest selling point for Hotels",
+      "subtitle": "Business",
+      "date": "18th January 2023",
+      "imageUrl": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    },
+    {
+      "id": 3,
+      "title": "Choose Your Lamps Wisely",
+      "subtitle": "Style",
+      "date": "5th January 2025",
+      "imageUrl": "https://images.unsplash.com/photo-1560288847-74d32006d7d7?q=80&w=2073&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+    },
+    {
+        "id": 4,
+        "title": "Clock Is Ticking",
+        "subtitle": "Uncategorized",
+        "date": "25th May 2025",
+        "imageUrl": "https://plus.unsplash.com/premium_photo-1725075086911-25e923a7e646?q=80&w=2071&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      }
+  ]
+  

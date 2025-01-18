@@ -1,0 +1,108 @@
+[
+    {
+      "id": 1,
+      "name": "Kitchen Faucet",
+      "category": "Kitchen Appliances",
+      "description": "Faucet in Matte black finish",
+      "price": 79.99,
+      "oldPrice": 99.99,
+      "image": "https://plus.unsplash.com/premium_photo-1668555047949-b20e086df1c9?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "black",
+      "rating": 4.5,
+      "author":"admin"
+    },
+    {
+      "id": 2,
+      "name": "Towel Set",
+      "category": "Amenities",
+      "description": "6 towel set",
+      "price": 19.99,
+      "oldPrice": 29.99,
+      "image": "https://plus.unsplash.com/premium_photo-1675799687055-96e9c9de10e2?q=80&w=1965&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "red",
+      "rating": 4.0
+    },
+    {
+      "id": 3,
+      "name": "Toaster",
+      "category": "Kitchen Appliances",
+      "description": "Stainless steel toaster",
+      "price": 199.99,
+      "image": "https://plus.unsplash.com/premium_photo-1719452894874-3da9fa3b882c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "gold",
+      "rating": 4.7
+    },
+    {
+      "id": 4,
+      "name": "Spoon Set",
+      "category": "Kitchen Accessories",
+      "description": "Spoon set of 4 items",
+      "price": 19.99,
+      "image": "https://plus.unsplash.com/premium_photo-1716922967265-6eb88266e37a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjV8fGNvb2t3YXJlfGVufDB8fDB8fHww",
+      "color": "red",
+      "rating": 4.2
+    },
+    {
+      "id": 5,
+      "name": "Coffee Pot",
+      "category": "Kitchen Accessories",
+      "description": "Coffee pot for early morning coffee",
+      "price": 29.99,
+      "oldPrice": 39.99,
+      "image": "https://images.unsplash.com/photo-1593369196682-6d8ec9ff3ae0?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "blue",
+      "rating": 4.3
+    },
+    {
+      "id": 6,
+      "name": "Wall Lamp",
+      "category": "Lighting",
+      "description": "Yellow wall lamp",
+      "price": 29.99,
+      "image": "https://plus.unsplash.com/premium_photo-1668005190411-1042cd38522e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "black",
+      "rating": 4.4
+    },
+    {
+      "id": 7,
+      "name": "Hanging Lamp",
+      "category": "Lighting",
+      "description": "Hanging lamp",
+      "price": 29.99,
+      "oldPrice": 39.99,
+      "image": "https://plus.unsplash.com/premium_photo-1705582800047-1aacf1e0f0ba?q=80&w=1964&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "silver",
+      "rating": 4.8
+    },
+    {
+      "id": 8,
+      "name": "Fancy Chair",
+      "category": "Furniture",
+      "description": "Fancy chair for fancy people",
+      "price": 99.99,
+      "image": "https://plus.unsplash.com/premium_photo-1705169612592-32610774a5d0?q=80&w=2040&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "beige",
+      "rating": 4.1
+    },
+    {
+      "id": 9,
+      "name": "Mattress",
+      "category": "Bedding",
+      "description": "Mattress for comfortable sleep",
+      "price": 89.99,
+      "image": "https://images.unsplash.com/photo-1640003145136-f998284e11de?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "black",
+      "rating": 4.6
+    },
+    {
+      "id": 10,
+      "name": "Chair",
+      "category": "Furniture",
+      "description": "Fashionable chair",
+      "price": 79.99,
+      "oldPrice": 99.99,
+      "image": "https://plus.unsplash.com/premium_photo-1681558314333-fb036f1df542?q=80&w=1932&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "color": "green",
+      "rating": 4.2
+    }
+  ]
