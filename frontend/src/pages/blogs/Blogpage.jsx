@@ -1,7 +1,6 @@
 import blogsData from "../../data/blogs.json"
 
 const Blogpage = () => {
-    console.log(blogsData)
   return (
     <section className="section__container blog__container">
         <h2 className = "section__header">Latest From The Blog</h2>

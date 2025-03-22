@@ -2,7 +2,7 @@
     {
       "id": 1,
       "name": "Kitchen Faucet",
-      "category": "Kitchen Appliances",
+      "category": "kitchen appliances",
       "description": "Faucet in Matte black finish",
       "price": 79.99,
       "oldPrice": 99.99,
@@ -14,7 +14,7 @@
     {
       "id": 2,
       "name": "Towel Set",
-      "category": "Amenities",
+      "category": "amenities",
       "description": "6 towel set",
       "price": 19.99,
       "oldPrice": 29.99,
@@ -25,7 +25,7 @@
     {
       "id": 3,
       "name": "Toaster",
-      "category": "Kitchen Appliances",
+      "category": "kitchen appliances",
       "description": "Stainless steel toaster",
       "price": 199.99,
       "image": "https://plus.unsplash.com/premium_photo-1719452894874-3da9fa3b882c?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -35,7 +35,7 @@
     {
       "id": 4,
       "name": "Spoon Set",
-      "category": "Kitchen Accessories",
+      "category": "kitchen accessories",
       "description": "Spoon set of 4 items",
       "price": 19.99,
       "image": "https://plus.unsplash.com/premium_photo-1716922967265-6eb88266e37a?w=500&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjV8fGNvb2t3YXJlfGVufDB8fDB8fHww",
@@ -45,7 +45,7 @@
     {
       "id": 5,
       "name": "Coffee Pot",
-      "category": "Kitchen Accessories",
+      "category": "kitchen accessories",
       "description": "Coffee pot for early morning coffee",
       "price": 29.99,
       "oldPrice": 39.99,
@@ -56,7 +56,7 @@
     {
       "id": 6,
       "name": "Wall Lamp",
-      "category": "Lighting",
+      "category": "lighting",
       "description": "Yellow wall lamp",
       "price": 29.99,
       "image": "https://plus.unsplash.com/premium_photo-1668005190411-1042cd38522e?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -66,7 +66,7 @@
     {
       "id": 7,
       "name": "Hanging Lamp",
-      "category": "Lighting",
+      "category": "lighting",
       "description": "Hanging lamp",
       "price": 29.99,
       "oldPrice": 39.99,
@@ -77,9 +77,9 @@
     {
       "id": 8,
       "name": "Fancy Chair",
-      "category": "Furniture",
+      "category": "furniture",
       "description": "Fancy chair for fancy people",
-      "price": 99.99,
+      "price": 199.99,
       "image": "https://plus.unsplash.com/premium_photo-1705169612592-32610774a5d0?q=80&w=2040&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
       "color": "beige",
       "rating": 4.1
@@ -87,7 +87,7 @@
     {
       "id": 9,
       "name": "Mattress",
-      "category": "Bedding",
+      "category": "bedding",
       "description": "Mattress for comfortable sleep",
       "price": 89.99,
       "image": "https://images.unsplash.com/photo-1640003145136-f998284e11de?q=80&w=2072&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
@@ -97,7 +97,7 @@
     {
       "id": 10,
       "name": "Chair",
-      "category": "Furniture",
+      "category": "furniture",
       "description": "Fashionable chair",
       "price": 79.99,
       "oldPrice": 99.99,
