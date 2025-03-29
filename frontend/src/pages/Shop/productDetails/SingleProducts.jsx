@@ -4,6 +4,7 @@ import RatingStars from '../../../components/RatingStars'
 import { useDispatch } from 'react-redux'
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi'
 import { addToCart } from '../../../redux/features/cart/cartSlice'
+import ReviewsCard from '../reviews/ReviewsCard'
 
 const SingleProducts = () => {
     const {id} = useParams()
@@ -69,7 +70,7 @@ const SingleProducts = () => {
 
         {/*Display Reviews */}
         <section className = "section__container mt-8">
-            Reviews Here
+            <ReviewsCard productReviews = {productReviews}/>
         </section>
     </>
   )

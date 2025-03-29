@@ -25,11 +25,17 @@ app.use(cors({
 //all routes
 const authRoutes = require('./src/users/user.route');
 const productRoutes = require('./src/products/products.route');
-const dashboardRoutes = require('./src/routes/dashboard.route')
+const reviewRoutes = require("./src/reviews/reviews.router");
+const orderRoutes = require("./src/orders/orders.route");
+
+const dashboardRoutes = require('./src/routes/dashboard.route');
 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/reviews', reviewRoutes);
+app.use('/api/orders', orderRoutes)
+
 app.use('/api/dashboard', dashboardRoutes);
 
 main().then(() => console.log("Mongodb successfully connected")).catch(err => console.log(err));
