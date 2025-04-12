@@ -29,7 +29,7 @@ const productsApi = createApi ({
         }),
         AddProduct: builder.mutation({
             query: (newProduct) => ({
-                url:"/create-post",
+                url:"/create-product",
                 method: "POST",
                 body: newProduct,
                 credentials: "include"
@@ -42,7 +42,7 @@ const productsApi = createApi ({
         }),
         updateProduct: builder.mutation({
             query: ({id, ...rest}) => ({
-                url: `/update-products/${id}`,
+                url: `/update-product/${id}`,
                 method: "PATCH",
                 body: rest,
                 credentials: "include"

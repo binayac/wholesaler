@@ -22,21 +22,27 @@ app.use(cors({
     credentials: true
 }))
 
+//image upload
+const uploadImage = require('./src/utils/uploadImage')
+
+
 //all routes
 const authRoutes = require('./src/users/user.route');
 const productRoutes = require('./src/products/products.route');
 const reviewRoutes = require("./src/reviews/reviews.router");
 const orderRoutes = require("./src/orders/orders.route");
+const statsRoutes = require("./src/stats/stats.route")
 
-const dashboardRoutes = require('./src/routes/dashboard.route');
+// const dashboardRoutes = require('./src/routes/dashboard.route');
 
 
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/orders', orderRoutes)
+app.use('/api/stats', statsRoutes)
 
-app.use('/api/dashboard', dashboardRoutes);
+// app.use('/api/dashboard', dashboardRoutes);
 
 main().then(() => console.log("Mongodb successfully connected")).catch(err => console.log(err));
 
@@ -51,6 +57,15 @@ async function main() {
 
   }
 
+  app.post("/uploadImage", (req, res) => {
+    console.log("Received image:", req.body.image?.substring(0, 100));
+    uploadImage(req.body.image)
+      .then((url) => res.send(url))
+      .catch((err) => {
+        console.error("Upload error:", err)
+        res.status(500).send({ error: err.message || "Upload failed" })
+      });
+  });
 
 
 app.listen(port, () => {

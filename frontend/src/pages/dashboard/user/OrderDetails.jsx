@@ -1,30 +1,16 @@
-import { useState, useEffect } from "react"
-import { getBaseUrl } from "../utils/baseURL"
-import TimelineStep from "./TimelineStep";
+import { useSelector } from "react-redux"
+import { useGetOrderByIdQuery } from "../../../redux/features/orders/orderApi"
+import { useParams } from "react-router-dom"
+import TimelineStep from "../../../components/TimelineStep"
 
 
-const PaymentSuccess = () => {
-    const [order, setOrder] = useState(null);
-    useEffect(() => {
-        const query = new URLSearchParams(window.location.search);
-        const sessionId = query.get('session_id');
-        
-        
-        if(sessionId) {
-            fetch(`${getBaseUrl()}/api/orders/confirm-payment`, {
-                method: "POST",
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({session_id: sessionId})
-            })
-            .then((res) => res.json())
-            .then((data) => setOrder(data))
-            .catch((err) => console.error("Error confirming payment", err))
-        }
-        
-    }, [])
-    if(!order) return <div>Loading...</div>
+const OrderDetails = () => {
+    // const {user} = useSelector((state) => state.auth)
+    const {orderId} = useParams()
+    const {data: order, error, isLoading} = useGetOrderByIdQuery(orderId)
+    console.log(order)
+    if(isLoading) return <div>Loading...</div>
+    if(error) return <div>No orders!</div>
 
     const isCompleted = (status) => {
         const statuses = ["pending", "processing", "shipped", "completed"]
@@ -44,7 +30,7 @@ const PaymentSuccess = () => {
           status: 'processing',
           label: 'Processing',
           description: 'Your order is currently being processed.',
-          icon: { iconName: 'loader-line', bgColor: 'yellow-800', textColor: 'yellow-800' },
+          icon: { iconName: 'loader-line', bgColor: 'bg-yellow-800', textColor: 'yellow-800' },
         },
         {
           status: 'shipped',
@@ -62,7 +48,7 @@ const PaymentSuccess = () => {
 
 
   return (
-    <section className="section__container rounded p-6">
+        <section className="section__container rounded p-6">
         <h2 className="text-2xl font-semibold mb-4">Payment {order?.status}</h2>
         <p className="mb-4">Order Id: {order?.orderId}</p>
         <p className="mb-8">Status: {order?.status}</p>
@@ -86,4 +72,4 @@ const PaymentSuccess = () => {
   )
 }
 
-export default PaymentSuccess
+export default OrderDetails
