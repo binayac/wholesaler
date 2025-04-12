@@ -5,17 +5,32 @@ const router = express.Router();
 
 
 //Register endpoint
-router.post('/register', async(req, res) => {
-    try{
-        const {username, email, password} = req.body;
-        const user = new User({email, username, password});
+router.post('/register', async (req, res) => {
+    try {
+        const { username, email, password, role, businessName, businessLicense, taxId } = req.body;
+
+        const userData = {
+            username,
+            email,
+            password,
+            role: role || "regular", // default to "regular" if not provided
+        };
+
+        if (role === "wholesaler") {
+            userData.businessName = businessName;
+            userData.businessLicense = businessLicense;
+            userData.taxId = taxId;
+            userData.isWholesalerApproved = false; // optional: approval workflow
+        }
+
+        const user = new User(userData);
         await user.save();
-        res.status(201).send({message: "User registration successful!"})
-    } catch(error) {
+        res.status(201).send({ message: "User registration successful!" });
+    } catch (error) {
         console.error("Error registering user", error);
-        res.status(500).send({message: " Error registering user"})
+        res.status(500).send({ message: "Error registering user" });
     }
-})
+});
 
 
 //login user endpoint
@@ -132,5 +147,19 @@ router.patch('/edit-profile', async(req, res) => {
         res.status(500).send({message: "Error updating user profile"})
     }
 })
+
+//approve wholesalers
+router.put('/approve-wholesaler/:id', async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.params.id, { isWholesalerApproved: true }, { new: true });
+        if (!user || user.role !== 'wholesaler') {
+            return res.status(404).send({ message: "Wholesaler not found" });
+        }
+        res.status(200).send({ message: "Wholesaler approved successfully", user });
+    } catch (error) {
+        console.error("Error approving wholesaler", error);
+        res.status(500).send({ message: "Error approving wholesaler" });
+    }
+});
 
 module.exports = router;

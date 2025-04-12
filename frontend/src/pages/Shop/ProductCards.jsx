@@ -1,9 +1,12 @@
 import { Link } from "react-router-dom"
 import RatingStars from "../../components/RatingStars"
-import { useDispatch } from "react-redux"
+import { useDispatch, useSelector } from "react-redux"
 import { addToCart } from "../../redux/features/cart/cartSlice";
 
 const ProductCards = ({products}) => {
+
+    const role = useSelector((state) => state.auth.user?.role)
+
     const dispatch = useDispatch()
     const handleAddToCart = (product) => {
         dispatch(addToCart(product))
@@ -31,7 +34,14 @@ const ProductCards = ({products}) => {
                     {/* product description */}
                     <div className = "product__card__content">
                         <h4>{product.name}</h4>
-                        <p>{product.price}{product.oldPrice ? <s>${product?.oldPrice}</s> : null}</p>
+                        {role === "wholesaler" && product.wholesalerPrice ? (
+  <>
+    {product.wholesalerPrice}{" "}
+    <s className="text-gray-500">{product.price}</s>
+  </>
+) : (
+  product.price
+)}
                         <RatingStars rating = {product.rating}/>
                     </div>
                 </div>

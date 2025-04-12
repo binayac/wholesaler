@@ -93,7 +93,7 @@ const ManageProduct = () => {
                 <tbody>
                   {products &&
                     products.map((product, index) => (
-                      <tr>
+                      <tr key= {index}>
                         <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
                           {index + 1}
                         </th>
@@ -128,6 +128,7 @@ const ManageProduct = () => {
             {
                 [...Array(totalPages)].map((_, index) => (
                     <button 
+                    key = {index}
                     onClick={() => handlePageChange(index+1)}
                     className={`px-4 py-2 ${currentPage === index+1 ? "bg-blue-500 text-white" : "bg-gray-300 text-gray-700"} rounded-md mx-1`}>{index+1}</button>
                 ))

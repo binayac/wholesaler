@@ -21,6 +21,7 @@ const AddProduct = () => {
         name: '',
         category: '',
         price: '',
+        wholesalerPrice: '',
         description: ''
     })
     const [image, setImage] = useState('')
@@ -80,6 +81,14 @@ const AddProduct = () => {
                 label = "Price"
                 name = "price"
                 value = {product.price}
+                onChange={handleChange}
+                type = "number"
+                placeholder={50}
+            />
+            <TextInput 
+                label = "Wholesaler Price"
+                name = "wholesalePrice"
+                value = {product.wholesalerPrice}
                 onChange={handleChange}
                 type = "number"
                 placeholder={50}

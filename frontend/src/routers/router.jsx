@@ -21,7 +21,8 @@ import AddProduct from "../pages/dashboard/admin/addProduct/AddProduct";
 import ManageProduct from "../pages/dashboard/admin/manageProduct/ManageProduct";
 import UpdateProduct from "../pages/dashboard/admin/manageProduct/UpdateProduct";
 import ManageUsers from "../pages/dashboard/admin/users/ManageUsers";
-import ManageOrders from "../pages/dashboard/admin/ManageOrders/ManageOrders";
+import ManageOrders from "../pages/dashboard/admin/manageOrders/ManageOrders";
+
 const router = createBrowserRouter([
     {
       path: "/",

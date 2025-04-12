@@ -24,6 +24,7 @@ const UpdateProduct = () => {
         name: '',
         category: '',
         price: '',
+        wholesalerPrice: '',
         description: '',
         image: ''
     })
@@ -32,7 +33,7 @@ const UpdateProduct = () => {
 
     const [newImage, setNewImage] = useState(null)
 
-    const {name, category, description, image: imageURL, price } = productData?.product || {};
+    const {name, category, description, image: imageURL, price, wholesalerPrice } = productData?.product || {};
 
     const [updateProduct, {isLoading:isUpdating, error: updateError}] = useUpdateProductMutation();
 
@@ -42,6 +43,7 @@ const UpdateProduct = () => {
                 name: name || '',
                 category: category || '',
                 price: price || '',
+                wholesalerPrice: wholesalerPrice || '',
                 description: description || '',
                 image: imageURL || ''
             })
@@ -109,6 +111,14 @@ const UpdateProduct = () => {
                     type="number"
                     placeholder="50"
                     value={product.price}
+                    onChange={handleChange}
+                />
+                <TextInput
+                    label="Wholesaler Price"
+                    name="wholesalerPrice"
+                    type="number"
+                    placeholder="50"
+                    value={product.wholesalerPrice}
                     onChange={handleChange}
                 />
 

@@ -30,34 +30,64 @@ router.post("/create-product", async(req, res) => {
 })
 
 //get all products
-router.get("/", async(req, res) => {
+router.get("/", async (req, res) => {
     try {
-        const {category, color, minPrice, maxPrice, page=1, limit = 10} = req.query;
+        const { category, color, minPrice, maxPrice, page = 1, limit = 10 } = req.query;
         let filter = {};
-        if(category && category !== "all"){
-            filter.category = category;
-        }
-        if(color && color !== "all"){
-            filter.color = color;
-        }
-        if(minPrice && maxPrice){
-            const min = parseFloat(minPrice);
-            const max = parseFloat(maxPrice);
-            if(!isNaN(min) && !isNaN(max)){
-                filter.price = {$gte: min, $lte: max};
+
+        // Optional: Decode JWT to get user role
+        let userRole = "user"; // default role
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            const token = authHeader.split(" ")[1];
+            try {
+                const decoded = jwt.verify(token, process.env.JWT_SECRET);
+                userRole = decoded?.role || "user";
+            } catch (err) {
+                console.warn("Invalid token:", err.message);
             }
         }
+
+        // Filters
+        if (category && category !== "all") {
+            filter.category = category;
+        }
+        if (color && color !== "all") {
+            filter.color = color;
+        }
+        if (minPrice && maxPrice) {
+            const min = parseFloat(minPrice);
+            const max = parseFloat(maxPrice);
+            if (!isNaN(min) && !isNaN(max)) {
+                filter.price = { $gte: min, $lte: max };
+            }
+        }
+
         const skip = (parseInt(page) - 1) * parseInt(limit);
         const totalProducts = await Products.countDocuments(filter);
         const totalPages = Math.ceil(totalProducts / parseInt(limit));
-        const products = await Products.find(filter).skip(skip).limit(parseInt(limit)).populate("author", "email").sort({createdAt: -1});
-        res.status(200).send({products, totalPages, totalProducts});
+        const productsRaw = await Products.find(filter)
+            .skip(skip)
+            .limit(parseInt(limit))
+            .populate("author", "email")
+            .sort({ createdAt: -1 });
+
+        // Replace price with wholesalerPrice if user is wholesaler
+        const products = productsRaw.map((product) => {
+            const productObj = product.toObject();
+            if (userRole === "wholesaler" && productObj.wholesalerPrice) {
+                productObj.price = productObj.wholesalerPrice;
+            }
+            return productObj;
+        });
+
+        res.status(200).send({ products, totalPages, totalProducts });
 
     } catch (error) {
         console.error("Error fetching products", error);
-        res.status(500).send({message:"Error fetching products"})
+        res.status(500).send({ message: "Error fetching products" });
     }
-})
+});
 
 //get single product
 router.get("/:id", async(req, res) => {

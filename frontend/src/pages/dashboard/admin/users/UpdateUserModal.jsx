@@ -37,6 +37,7 @@ const UpdateUserModal = ({ user, onClose, onRoleUpdate }) => {
                     >
                         <option value="user">User</option>
                         <option value="admin">Admin</option>
+                        <option value="wholesaler">Wholesaler</option>
                     </select>
                 </div>
 

@@ -100,10 +100,10 @@ const Navbar = () => {
                                     {dropdownMenus.map((menu,index) => (
                                         <li key = {index}>
                                             <Link 
-                                            onClick = {() => setIsDropDownOpen} className="dropdown-items" to = {menu.path}>{menu.label}</Link>
+                                            onClick = {() => setIsDropDownOpen} className="dropdown-items hover:bg-gray-100 block p-3" to = {menu.path}>{menu.label}</Link>
                                         </li>
                                     ))}
-                                    <li><Link onClick={(e) => handleLogout(e)} className="dropdown-items">Logout</Link></li>
+                                    <li><Link onClick={(e) => handleLogout(e)} className="dropdown-items hover:bg-gray-100 block p-3">Logout</Link></li>
                                 </ul>
                             </div>
                         )
