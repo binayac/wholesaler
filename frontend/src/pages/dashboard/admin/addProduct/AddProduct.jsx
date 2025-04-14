@@ -5,6 +5,7 @@ import TextInput from "./TextInput"
 import SelectInput from "./SelectInput"
 import UploadImage from "./UploadImage"
 import { useNavigate } from "react-router-dom"
+import { toast } from 'react-toastify';
 
 const categories = [
     {label: 'Select Category', value: ''},
@@ -40,13 +41,13 @@ const AddProduct = () => {
     const handleSubmit = async(e) => {
         e.preventDefault();
         if(!product.name || !product.category || !product.price || !product.description) {
-            alert('Please fill all the required fields');
+            toast.error('Please fill all the required fields');
             return;
         }
 
         try {
             await AddProduct({...product, image, author: user?._id}).unwrap();
-            alert('Product added successfully');
+            toast.success('Product added successfully');
             setProduct({ name: '',
                 category: '',
                 price: '',

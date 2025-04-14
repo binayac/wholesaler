@@ -5,6 +5,8 @@ import { useSelector } from 'react-redux';
 import TextInput from '../addProduct/TextInput';
 import SelectInput from '../addProduct/SelectInput';
 import UploadImage from '../addProduct/UploadImage';
+import { toast } from 'react-toastify';
+
 
 const categories = [
     { label: 'Select Category', value: '' },
@@ -76,7 +78,8 @@ const UpdateProduct = () => {
 
         try {
             await updateProduct({id: id, ...updatedProduct}).unwrap();
-            alert('Product updated successfully');
+            // alert('Product updated successfully');
+            toast.success('Product updated successfully');
             await refetch();
             navigate("/dashboard/manage-products")
         } catch (error) {
