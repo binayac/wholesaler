@@ -9,7 +9,7 @@ const UserOrders = () => {
     const orders = orderdata?.orders
     if(isLoading) return <div>Loading...</div>
     if(error) return <div>No orders found</div>
-    console.log(orderdata)
+    console.log(orders)
   return (
     <section className="py-1 bg-blueGray-50">
         <div className="w-full mb-12 xl:mb-0 px-4 mx-auto">
@@ -33,9 +33,6 @@ const UserOrders = () => {
                                 #
                                 </th>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
-                                Order ID
-                                </th>
-                <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
                                 Date
                                 </th>
                 <th className="px-6 bg-blueGray-50 text-blueGray-500 align-middle border border-solid border-blueGray-100 py-3 text-xs uppercase border-l-0 border-r-0 whitespace-nowrap font-semibold text-left">
@@ -57,9 +54,6 @@ const UserOrders = () => {
                             <th className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 text-left text-blueGray-700 ">
                             {index + 1}
                             </th>
-                            <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 ">
-                            {order?._id}
-                            </td>
                             <td className="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                             {
                                 new Date(order?.createdAt).toLocaleDateString()

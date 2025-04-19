@@ -39,7 +39,7 @@ const ManageOrders = () => {
         <div className='content__container'>
             <h2 className='text-2xl font-semibold mb-4'>Manage Orders</h2>
             <table className='min-w-full bg-white border border-gray-200 rounded-lg'>
-                <thead className='bg-gray-100'>
+                <thead className='bg-gray-100 text-left'>
                     <tr>
                         <th className='py-3 px-4 border-b'>Order Id</th>
                         <th className='py-3 px-4 border-b'>Customer</th>
