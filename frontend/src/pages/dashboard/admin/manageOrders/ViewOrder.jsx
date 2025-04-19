@@ -1,12 +1,22 @@
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetOrderByIdQuery } from "../../../redux/features/orders/orderApi";
-import TimelineStep from "../../../components/TimelineStep";
+import { useGetOrderByIdQuery } from '../../../../redux/features/orders/orderApi';
+import { Copy } from 'lucide-react';
 
-const OrderDetails = () => {
+const ViewOrder = () => {
   const { orderId } = useParams();
-  const { data: order, isLoading, error } = useGetOrderByIdQuery(orderId);
   const [copied, setCopied] = useState(false);
+
+  const { data: order, isLoading, error } = useGetOrderByIdQuery(orderId);
+  console.log(order)
+
+  const copyTrackingNumber = () => {
+    if (order?.trackingNumber) {
+      navigator.clipboard.writeText(order.trackingNumber);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Failed to load order.</p>;
@@ -18,52 +28,8 @@ const OrderDetails = () => {
   const items = order?.products || [];
   const totalAmount = items.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 0), 0);
 
-  // Check if the order status is completed
-  const isCompleted = (status) => {
-    const statuses = ["pending", "processing", "shipped", "completed"];
-    return statuses.indexOf(status) < statuses.indexOf(order.status);
-  };
-
-  const isCurrent = (status) => order.status === status;
-
-  const steps = [
-    {
-      status: 'pending',
-      label: 'Pending',
-      description: 'Your order has been created and is awaiting processing.',
-      icon: { iconName: 'time-line', bgColor: 'red-500', textColor: 'gray-800' },
-    },
-    {
-      status: 'processing',
-      label: 'Processing',
-      description: 'Your order is currently being processed.',
-      icon: { iconName: 'loader-line', bgColor: 'bg-yellow-800', textColor: 'yellow-800' },
-    },
-    {
-      status: 'shipped',
-      label: 'Shipped',
-      description: 'Your order has been shipped.',
-      icon: { iconName: 'truck-line', bgColor: 'blue-800', textColor: 'blue-800' },
-    },
-    {
-      status: 'completed',
-      label: 'Completed',
-      description: 'Your order has been successfully completed.',
-      icon: { iconName: 'check-line', bgColor: 'green-800', textColor: 'green-900' },
-    },
-  ];
-
-  const copyTrackingNumber = () => {
-    if (order?.trackingNumber) {
-      navigator.clipboard.writeText(order.trackingNumber);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
-  };
-
   return (
-    <section className="content__container rounded p-6">
-      {/* Order Details Section */}
+    <div className="w-full mx-auto bg-white">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Order Detail</h1>
         <div className="flex items-center gap-2">
@@ -122,32 +88,10 @@ const OrderDetails = () => {
             <span className="font-semibold">$ {totalAmount.toLocaleString() || '0'}</span>
             <span className="text-gray-500 ml-1">({items.length} Items)</span>
           </div>
-          <div className="flex space-x-3">
-            <button className="bg-black text-white px-4 py-2 rounded-md text-sm font-medium">Invoice</button>
-          </div>
         </div>
       </div>
-
-      {/* Order Timeline */}
-      <div className='w-full'>
-        <h2 className="text-2xl font-semibold mt-8 pt-8 mb-4 border-t">Order Status</h2>
-        <ol className="sm:flex items-start relative">
-          {steps.map((step, index) => (
-            <TimelineStep
-              key={index}
-              step={step}
-              order={order}
-              isCompleted={isCompleted(step.status)}
-              isCurrent={isCurrent(step.status)}
-              isLastStep={index === steps.length - 1}
-              icon={step.icon}
-              description={step.description}
-            />
-          ))}
-        </ol>
-      </div>
-    </section>
+    </div>
   );
 };
 
-export default OrderDetails;
+export default ViewOrder;

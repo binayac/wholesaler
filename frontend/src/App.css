@@ -25,6 +25,11 @@
   margin: auto;
   padding: 5rem 1rem;
 }
+.content__container{
+  max-width: var(--max-width-1200);
+  margin: auto;
+
+}
 
 .section__header {
   margin-bottom: 1rem;

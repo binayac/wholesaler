@@ -22,6 +22,8 @@ import ManageProduct from "../pages/dashboard/admin/manageProduct/ManageProduct"
 import UpdateProduct from "../pages/dashboard/admin/manageProduct/UpdateProduct";
 import ManageUsers from "../pages/dashboard/admin/users/ManageUsers";
 import ManageOrders from "../pages/dashboard/admin/manageOrders/ManageOrders";
+import ViewOrder from "../pages/dashboard/admin/manageOrders/ViewOrder";
+import Checkout from "../components/Checkout";
 
 const router = createBrowserRouter([
     {
@@ -40,6 +42,10 @@ const router = createBrowserRouter([
         {
           path: "/orders/:orderId",
           element: <OrderDetails/>
+        },
+        {
+          path: "/checkout",
+          element: <Checkout />
         }
         
       ]
@@ -89,6 +95,10 @@ const router = createBrowserRouter([
         {
           path: 'manage-orders', 
           element: <PrivateRoute role="admin"><ManageOrders /></PrivateRoute>
+        },
+        {
+          path: 'view-orders/:orderId', 
+          element: <PrivateRoute role="admin"><ViewOrder /></PrivateRoute>
         },
       ] 
     }

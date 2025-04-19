@@ -8,12 +8,14 @@ const UpdateOrderModal = ({order, isOpen, onClose}) => {
 
     const handleUpdateOrderStatus = async ()=> {
         try {
-            await updateOrderStatus({id: order?._id, status})
+            // Make sure to use order.orderId instead of _id if you are using orderId in your database
+            await updateOrderStatus({id: order?.orderId, status});
             onClose();
         } catch (error) {
-            console.error("Failed to update order status:", err);
+            console.error("Failed to update order status:", error);
         }
     }
+    console.log("Updating order with ID:", order?.orderId);
 
     if(!isOpen) return null;
   return (

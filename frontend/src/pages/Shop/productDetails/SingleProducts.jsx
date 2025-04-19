@@ -42,7 +42,7 @@ const SingleProducts = () => {
                     <img src={singleProduct?.image} alt="" 
                     className = "rounded-md w-full h-auto"/>
                 </div>
-                <div className = "md: w-1/2 w-full">
+                <div className = "md: w-1/2 md:w-full">
                     <h3 className = "text-2x; font-semibold mb-4">{singleProduct?.name}</h3>
                     <p className = "text-xl text-primary mb-4">
                         ${singleProduct?.price}

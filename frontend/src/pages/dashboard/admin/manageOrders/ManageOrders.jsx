@@ -36,7 +36,7 @@ const ManageOrders = () => {
     if (error) return <div>Something went wrong!</div>
 
     return (
-        <div className='section__container p-6'>
+        <div className='content__container'>
             <h2 className='text-2xl font-semibold mb-4'>Manage Orders</h2>
             <table className='min-w-full bg-white border border-gray-200 rounded-lg'>
                 <thead className='bg-gray-100'>
@@ -60,7 +60,7 @@ const ManageOrders = () => {
                                 </td>
                                 <td className='py-3 px-4 border-b'>{formatDate(order?.updatedAt)}</td>
                                 <td className='py-3 px-4 border-b flex items-center space-x-4'>
-                                    <Link to='#' className="text-blue-500 hover:underline">View</Link>
+                                    <Link to={`/dashboard/view-orders/${order.orderId}`} className="text-blue-500 hover:underline">View</Link>
                                     <button className="text-green-500 hover:underline" onClick={() => handleEditOrder(order)}>Edit</button>
                                     <button className="text-red-500 hover:underline" onClick={() => handleDeleteOder(order?._id)}>Delete</button>
                                 </td>
