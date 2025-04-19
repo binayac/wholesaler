@@ -24,6 +24,8 @@ import ManageUsers from "../pages/dashboard/admin/users/ManageUsers";
 import ManageOrders from "../pages/dashboard/admin/manageOrders/ManageOrders";
 import ViewOrder from "../pages/dashboard/admin/manageOrders/ViewOrder";
 import Checkout from "../components/Checkout";
+import ApproveWholesalers from "../pages/dashboard/admin/wholesalers/ApproveWholesalers";
+import ManageWholesalers from "../pages/dashboard/admin/wholesalers/ManageWholesalers";
 
 const router = createBrowserRouter([
     {
@@ -97,8 +99,8 @@ const router = createBrowserRouter([
           element: <PrivateRoute role="admin"><ManageOrders /></PrivateRoute>
         },
         {
-          path: 'view-orders/:orderId', 
-          element: <PrivateRoute role="admin"><ViewOrder /></PrivateRoute>
+          path: 'manage-wholesalers', 
+          element: <PrivateRoute role="admin"><ManageWholesalers /></PrivateRoute>
         },
       ] 
     }

@@ -31,8 +31,13 @@ const Login = () => {
       toast.success("Login successful!");
       navigate("/");
     } catch (error) {
-      toast.error("Login failed");
-      setMessage("Please provide a valid email and password");
+      if (error.status === 403 && error.data?.message?.includes("pending approval")) {
+        toast.info("Your account is pending approval. Please wait for admin approval.");
+        setMessage("Your account is pending approval. Please wait for admin approval.");
+      } else {
+        toast.error("Login failed");
+        setMessage("Please provide a valid email and password");
+      }
     }
   };
   return (

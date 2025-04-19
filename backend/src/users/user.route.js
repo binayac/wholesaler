@@ -34,38 +34,51 @@ router.post('/register', async (req, res) => {
 
 
 //login user endpoint
-router.post('/login', async(req, res) => {
-    const {email, password} = req.body;
+router.post('/login', async (req, res) => {
+    const { email, password } = req.body;
     try {
-        const user = await User.findOne({email});
-    if (!user) {
-        return res.status(404).send({message: 'User not found'})
-    }
-    const isMatch = await user.comparePassword(password);
-    if (!isMatch) {
-        return res.status(401).send({message:'Password not match'})
-    }
-    const token = await generateToken(user._id);
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
 
-    res.cookie('token', token, {
-        httpOnly: true,
-        secure:true,
-        sameSite: 'None'
-    })
-    res.status(200). send({message: "Logged in successfully!", token, user: {
-        _id: user._id,
-        email:user.email,
-        username: user.username,
-        role: user.role,
-        profileImage: user.profileImage,
-        bio: user.bio,
-        profession: user.profession
-    }})
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
+            return res.status(401).send({ message: 'Password not match' });
+        }
+
+        // 🛑 Wholesaler must be approved
+        if (user.role === 'wholesaler' && user.wholesalerStatus !== 'approved') {
+            return res.status(403).send({ message: 'Your account is pending approval. Please wait for admin approval.' });
+        }
+
+        const token = await generateToken(user._id);
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: 'None',
+        });
+
+        res.status(200).send({
+            message: 'Logged in successfully!',
+            token,
+            user: {
+                _id: user._id,
+                email: user.email,
+                username: user.username,
+                role: user.role,
+                profileImage: user.profileImage,
+                bio: user.bio,
+                profession: user.profession,
+            },
+        });
     } catch (error) {
-        console.error("Error logged in user", error);
-        res.status(500).send({message: "Error logged in user"})
+        console.error('Error logged in user', error);
+        res.status(500).send({ message: 'Error logged in user' });
     }
-})
+});
+
 
 //logout endpoint
 router.post('/logout', (req, res) => {
@@ -148,17 +161,38 @@ router.patch('/edit-profile', async(req, res) => {
     }
 })
 
-//approve wholesalers
-router.put('/approve-wholesaler/:id', async (req, res) => {
+// GET pending wholesalers
+router.get('/users/pending-wholesalers', async (req, res) => {
     try {
-        const user = await User.findByIdAndUpdate(req.params.id, { isWholesalerApproved: true }, { new: true });
-        if (!user || user.role !== 'wholesaler') {
-            return res.status(404).send({ message: "Wholesaler not found" });
-        }
-        res.status(200).send({ message: "Wholesaler approved successfully", user });
+        const wholesalers = await User.find({ role: 'wholesaler' });
+        res.status(200).json({ wholesalers });
     } catch (error) {
-        console.error("Error approving wholesaler", error);
-        res.status(500).send({ message: "Error approving wholesaler" });
+        console.error('Error fetching wholesalers', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+// PUT approve wholesaler
+router.patch('/users/approve-wholesaler/:userId', async (req, res) => {
+    try {
+        const { status } = req.body;
+        
+        const user = await User.findByIdAndUpdate(
+            req.params.userId, 
+            { 
+                wholesalerStatus: status,
+                // Update the boolean for backward compatibility
+                isWholesalerApproved: status === 'approved'
+            },
+            { new: true }
+        );
+        
+        if (!user) return res.status(404).json({ message: 'User not found' });
+        
+        res.status(200).json({ success: true, user });
+    } catch (error) {
+        console.error('Error updating wholesaler status', error);
+        res.status(500).json({ message: 'Server error' });
     }
 });
 

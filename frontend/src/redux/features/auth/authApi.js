@@ -59,9 +59,24 @@ const authApi = createApi({
                 method: "PATCH",
                 body: profileData
             }),
-        })
+        }),
+        getPendingWholesalers: builder.query({
+            query: () => ({
+                url: "/users/pending-wholesalers",
+                method: "GET"
+            }),
+            providesTags: ["Wholesalers"],
+        }),
+        approveWholesaler: builder.mutation({
+            query: ({ userId, status }) => ({
+                url: `/users/approve-wholesaler/${userId}`,
+                method: 'PATCH',
+                body: { status },
+            }),
+            invalidatesTags: ['Wholesalers'], // If you're using tag-based cache invalidation
+        }),
     }),
 })
 
-export const {useRegisterUserMutation, useLoginUserMutation, useLogoutUserMutation, useGetUserQuery, useDeleteUserMutation, useUpdateUserRoleMutation, useEditProfileMutation} = authApi
+export const {useRegisterUserMutation, useLoginUserMutation, useLogoutUserMutation, useGetUserQuery, useDeleteUserMutation, useUpdateUserRoleMutation, useEditProfileMutation, useGetPendingWholesalersQuery, useApproveWholesalerMutation} = authApi
 export default authApi

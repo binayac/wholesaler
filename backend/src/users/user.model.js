@@ -20,6 +20,11 @@ const userSchema = new Schema({
     businessName: String,  // Business details
     businessLicense: String, // Could store license number or file path
     taxId: String, // Taxpayer identification number for wholesalers
+    wholesalerStatus: { 
+        type: String, 
+        enum: ['pending', 'approved', 'rejected'], 
+        default: 'pending'
+    },
 });
 
 // Hashing passwords
