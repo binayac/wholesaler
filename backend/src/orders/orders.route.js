@@ -2,6 +2,7 @@ const express = require("express")
 const Order = require("./orders.model");
 const verifyToken = require("../middleware/verifyToken");
 const verifyAdmin = require("../middleware/verifyAdmin");
+const Products = require("../products/products.model");
 const router = express.Router()
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
@@ -28,9 +29,6 @@ router.post("/create-checkout-session", async(req, res) => {
         // Store MongoDB product details in the session metadata
         const productMetadata = products.map(product => ({
             id: product._id,
-            name: product.name,
-            image: product.image,
-            price: product.price
         }));
 
         const session = await stripe.checkout.sessions.create({
@@ -65,15 +63,20 @@ router.post("/confirm-payment", async (req, res) => {
         if (!order) {
             // Get product details from session metadata
             const productDetails = JSON.parse(session.metadata.productDetails || '[]');
+            const productIds = productDetails.map(p => p.id);
+
+            // Fetch full product info from DB
+            const productsFromDB = await Products.find({ _id: { $in: productIds } });
 
             // Map line items with quantity and product details
             const orderProducts = session.line_items.data.map(item => {
                 // Find corresponding product in our metadata
                 const quantity = item.quantity;
                 const stripeProductId = item.price.product;
+                const stripeProductName = item.description;
 
                 // Find the matching product from our database
-                const matchingProduct = productDetails.find(p => p.name === item.description);
+                const matchingProduct = productsFromDB.find(p => p.name === stripeProductName);
 
                 if (matchingProduct) {
                     return {
@@ -90,7 +93,8 @@ router.post("/confirm-payment", async (req, res) => {
                     productId: stripeProductId,
                     quantity: quantity,
                     name: item.description || "Unknown Product",
-                    price: (item.amount_total / 100) / quantity
+                    price: (item.amount_total / 100) / quantity,
+                    image: item.images
                 };
             });
 
