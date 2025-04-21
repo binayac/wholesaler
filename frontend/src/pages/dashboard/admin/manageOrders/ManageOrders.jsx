@@ -49,7 +49,7 @@ const ManageOrders = () => {
                     </tr>
                 </thead>
 
-                <tbody>
+                <tbody className='text-sm'>
                     {
                         orders && orders.map((order, index) => (
                             <tr key={index}>

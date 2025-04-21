@@ -102,6 +102,10 @@ const router = createBrowserRouter([
           path: 'manage-wholesalers', 
           element: <PrivateRoute role="admin"><ManageWholesalers /></PrivateRoute>
         },
+        {
+          path: 'view-orders/:orderId', 
+          element: <PrivateRoute role="admin"><ViewOrder /></PrivateRoute>
+        },
       ] 
     }
   ]);

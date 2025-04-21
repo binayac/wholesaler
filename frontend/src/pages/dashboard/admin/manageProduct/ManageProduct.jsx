@@ -102,7 +102,7 @@ const ManageProduct = () => {
                         </td>
                         <td className="border-t-0 px-6 align-center border-l-0 border-r-0 text-xs whitespace-nowrap p-4">
                           {formatDate(product?.createdAt)}
-                          {/* {console.log(product)} */}
+                          {console.log(product)}
                         </td>
                         <td className="border-t-0 px-6 align-middle border-l-0 border-r-0 text-xs whitespace-nowrap p-4 cursor-pointer hover:text-primary">
                             <Link to = {`/dashboard/update-product/${product._id}`}>Edit</Link>
