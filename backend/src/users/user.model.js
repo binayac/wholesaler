@@ -7,34 +7,33 @@ const userSchema = new Schema({
     password: { type: String, required: true },
     role: { 
         type: String, 
-        enum: ['user', 'wholesaler', 'admin'], // Added wholesaler role
+        enum: ['user', 'wholesaler', 'admin'],
         default: 'user' 
     },
     profileImage: String,
     bio: { type: String, maxlength: 200 },
     profession: String,
     createdAt: { type: Date, default: Date.now },
-    
+
     // Fields specific to wholesalers
-    isWholesalerApproved: { type: Boolean, default: false }, // Approval flag
-    businessName: String,  // Business details
-    businessLicense: String, // Could store license number or file path
-    taxId: String, // Taxpayer identification number for wholesalers
+    isWholesalerApproved: { type: Boolean, default: false },
+    businessName: String,
+    businessLicense: String,
+    taxId: String,
     wholesalerStatus: { 
         type: String, 
         enum: ['pending', 'approved', 'rejected'], 
         default: 'pending'
     },
+    totalSpent: { type: Number, default: 0 }  // Add the totalSpent field
 });
 
-// Hashing passwords
 userSchema.pre('save', async function (next) {
     if (!this.isModified('password')) return next();
     this.password = await bcrypt.hash(this.password, 10);
     next();
 });
 
-// Password comparison method
 userSchema.methods.comparePassword = function (candidatePassword) {
     return bcrypt.compare(candidatePassword, this.password);
 };

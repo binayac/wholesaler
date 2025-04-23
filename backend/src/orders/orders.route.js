@@ -3,19 +3,35 @@ const Order = require("./orders.model");
 const verifyToken = require("../middleware/verifyToken");
 const verifyAdmin = require("../middleware/verifyAdmin");
 const Products = require("../products/products.model");
+const User = require("../users/user.model");
 const router = express.Router()
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 //create checkout session
-router.post("/create-checkout-session", async(req, res) => {
-    const { products, userRole } = req.body;
+router.post("/create-checkout-session", async (req, res) => {
+    const { products, userRole, userId } = req.body;
 
     try {
+        // Fetch the user from the database to get totalSpent
+        const user = await User.findById(userId);
+
+        // Initialize discount variable
+        let discount = 0;
+
+        // If the user is a wholesaler and has spent above the threshold, apply a discount
+        if (userRole === 'wholesaler' && user.totalSpent >= 200) { // Threshold example: $1000
+            discount = 0.1; // 10% discount
+        }
+
+        // Map through products and calculate the price to use
         const lineItems = products.map((product) => {
             const priceToUse = userRole === "wholesaler" && product.wholesalerPrice
                 ? product.wholesalerPrice
                 : product.price;
-        
+
+            // Apply discount if applicable
+            const finalPrice = priceToUse * (1 - discount);
+
             return {
                 price_data: {
                     currency: "usd",
@@ -26,7 +42,7 @@ router.post("/create-checkout-session", async(req, res) => {
                             mongoDbId: product._id // Optional: for linking back
                         }
                     },
-                    unit_amount: Math.round(priceToUse * 100)
+                    unit_amount: Math.round(finalPrice * 100) // Convert to cents
                 },
                 quantity: product.quantity
             };
@@ -37,6 +53,7 @@ router.post("/create-checkout-session", async(req, res) => {
             id: product._id,
         }));
 
+        // Create the checkout session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: lineItems,
@@ -46,14 +63,26 @@ router.post("/create-checkout-session", async(req, res) => {
             metadata: {
                 productDetails: JSON.stringify(productMetadata)
             }
-        })
-        res.json({id: session.id})
-        
+        });
+
+        // Optionally update the user's totalSpent after the order is successful
+        const orderTotal = products.reduce((acc, product) => {
+            const priceToUse = product.wholesalerPrice || product.price;
+            const finalPrice = priceToUse * (1 - discount);
+            return acc + finalPrice * product.quantity;
+        }, 0);
+
+        // Update user's totalSpent field
+        user.totalSpent += orderTotal;
+        await user.save(); // Save the updated user data
+
+        res.json({ id: session.id });
+
     } catch (error) {
-        console.error("Error creating checkout session", error)
-        res.status(500).send({message: "Failed to create checkout session"})
+        console.error("Error creating checkout session", error);
+        res.status(500).send({ message: "Failed to create checkout session" });
     }
-})
+});
 
 //confirm payment
 router.post("/confirm-payment", async (req, res) => {

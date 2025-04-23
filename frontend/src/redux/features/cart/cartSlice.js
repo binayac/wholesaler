@@ -1,4 +1,4 @@
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
   products: [],
@@ -7,8 +7,10 @@ const initialState = {
   tax: 0,
   taxRate: 0.05,
   grandTotal: 0,
-  userRole: 'regular' // default value
-}
+  userRole: 'regular', // default value
+  discountApplied: false, // Track if a discount has been applied
+  discountMessage: '', // Message for the discount
+};
 
 const cartSlice = createSlice({
   name: 'cart',
@@ -40,9 +42,10 @@ const cartSlice = createSlice({
       state.totalPrice = setTotalPrice(state);
       state.tax = setTax(state);
       state.grandTotal = setGrandTotal(state);
+      // Check if discount should be applied after adding to cart
+      checkDiscount(state);
     },
-    
-    
+
     updateQuantity: (state, action) => {
       const { id, type } = action.payload;
       
@@ -65,6 +68,8 @@ const cartSlice = createSlice({
       state.totalPrice = setTotalPrice(state);
       state.tax = setTax(state);
       state.grandTotal = setGrandTotal(state);
+      // Check if discount should be applied after updating quantity
+      checkDiscount(state);
     },
     
     removeFromCart: (state, action) => {
@@ -79,6 +84,8 @@ const cartSlice = createSlice({
       state.totalPrice = setTotalPrice(state);
       state.tax = setTax(state);
       state.grandTotal = setGrandTotal(state);
+      // Check if discount should be applied after removing an item
+      checkDiscount(state);
     },
     
     clearCart: (state) => {
@@ -87,6 +94,18 @@ const cartSlice = createSlice({
       state.totalPrice = 0;
       state.tax = 0;
       state.grandTotal = 0;
+      state.discountApplied = false;
+      state.discountMessage = '';
+    },
+    
+    applyDiscount: (state, action) => {
+      state.discountApplied = true;
+      state.discountMessage = action.payload;
+    },
+    
+    removeDiscount: (state) => {
+      state.discountApplied = false;
+      state.discountMessage = '';
     }
   },
 });
@@ -107,5 +126,20 @@ export const setTax = (state) => setTotalPrice(state) * state.taxRate;
 
 export const setGrandTotal = (state) => setTotalPrice(state) + setTax(state);
 
-export const { addToCart, updateQuantity, removeFromCart, clearCart } = cartSlice.actions;
+// Check if discount applies based on your conditions (e.g., cart total)
+export const checkDiscount = (state) => {
+  if (state.totalPrice >= 100) { // Example condition (e.g., total >= 100)
+    if (!state.discountApplied) {
+      state.discountApplied = true;
+      state.discountMessage = 'Discount applied: You get a 10% discount!';
+    }
+  } else {
+    if (state.discountApplied) {
+      state.discountApplied = false;
+      state.discountMessage = 'Add more items to your cart to receive a discount!';
+    }
+  }
+};
+
+export const { addToCart, updateQuantity, removeFromCart, clearCart, applyDiscount, removeDiscount } = cartSlice.actions;
 export default cartSlice.reducer;
