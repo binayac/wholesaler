@@ -1,9 +1,10 @@
 import React from 'react'
 import OrderSummary from './OrderSummary'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { removeFromCart, updateQuantity } from '../../redux/features/cart/cartSlice'
 
 const CartModel = ({products, isOpen, onClose}) => {
+    const role = useSelector((state) => state.auth.user?.role)
     const dispatch = useDispatch()
     
     const handleQuantity = (type, id) => {
@@ -45,7 +46,16 @@ const CartModel = ({products, isOpen, onClose}) => {
                                             <img src={item.image} alt="" className="size-12 object-cover mr-4"/>
                                             <div>
                                                 <h5 className='text-lg font-medium'>{item.name}</h5>
-                                                <p className='text-gray-600 text-sm'>${Number(item.price).toFixed(2)}</p>
+                                                <p className='text-gray-600 text-sm'>
+                                                {role === "wholesaler" && item.wholesalerPrice ? (
+                                                <>
+                                                    {item.wholesalerPrice}{" "}
+                                                    <s className="text-gray-500">{item.price}</s>
+                                                </>
+                                                ) : (
+                                                item.price
+                                                )}
+                                                </p>
                                             </div>
                                         </div>
                                         <div className='flex flex-row md:justify-start justify-end items-center mt-2'>

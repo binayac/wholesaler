@@ -23,7 +23,8 @@ const OrderSummary = () => {
         const stripe = await loadStripe(import.meta.env.VITE_STRIPE_PK)
         const body = {
             products: products,
-            userId: user?._id
+            userId: user?._id,
+            userRole: user?.role || "regular"
         }
 
         const headers = {

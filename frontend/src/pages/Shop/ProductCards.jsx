@@ -9,7 +9,7 @@ const ProductCards = ({products}) => {
 
     const dispatch = useDispatch()
     const handleAddToCart = (product) => {
-        dispatch(addToCart(product))
+        dispatch(addToCart({ product, userRole: role }))
     }
   return (
     <div className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8'>
@@ -35,13 +35,13 @@ const ProductCards = ({products}) => {
                     <div className = "product__card__content">
                         <h4>{product.name}</h4>
                         {role === "wholesaler" && product.wholesalerPrice ? (
-  <>
-    {product.wholesalerPrice}{" "}
-    <s className="text-gray-500">{product.price}</s>
-  </>
-) : (
-  product.price
-)}
+                        <>
+                            {product.wholesalerPrice}{" "}
+                            <s className="text-gray-500">{product.price}</s>
+                        </>
+                        ) : (
+                        product.price
+                        )}
                         <RatingStars rating = {product.rating}/>
                     </div>
                 </div>

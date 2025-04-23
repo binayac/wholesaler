@@ -1,22 +1,24 @@
 import React from 'react'
 import {Link, useParams} from 'react-router-dom'
 import RatingStars from '../../../components/RatingStars'
-import { useDispatch } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import { useFetchProductByIdQuery } from '../../../redux/features/products/productsApi'
 import { addToCart } from '../../../redux/features/cart/cartSlice'
 import ReviewsCard from '../reviews/ReviewsCard'
 
 const SingleProducts = () => {
-    const {id} = useParams()
-    const dispatch = useDispatch()
-    const {data, error, isLoading} = useFetchProductByIdQuery(id)
+    const { id } = useParams();
+    const dispatch = useDispatch();
+    const { user } = useSelector((state) => state.auth);
+    const role = useSelector((state) => state.auth.user?.role)
+    const { data, error, isLoading } = useFetchProductByIdQuery(id);
 
-    const singleProduct = data?.product || {}
-    const productReviews = data?.reviews || {}
+    const singleProduct = data?.product || {};
+    const productReviews = data?.reviews || {};
 
     const handleAddToCart = (product) => {
-        dispatch(addToCart(product))
-    }
+        dispatch(addToCart({ product, userRole: user?.role || "regular" }));
+    };
 
 
 
@@ -45,8 +47,15 @@ const SingleProducts = () => {
                 <div className = "md: w-1/2 md:w-full">
                     <h3 className = "text-2x; font-semibold mb-4">{singleProduct?.name}</h3>
                     <p className = "text-xl text-primary mb-4">
-                        ${singleProduct?.price}
-                        {singleProduct?.oldPrice && <s className = "ml-2">${singleProduct?.oldPrice}</s>}</p>
+                    {role === "wholesaler" && singleProduct.wholesalerPrice ? (
+                        <>
+                            {singleProduct.wholesalerPrice}{" "}
+                            <s className="text-gray-500">{singleProduct.price}</s>
+                        </>
+                        ) : (
+                        singleProduct.price
+                    )}
+                    </p>
                     <p className = "text-gray-700 mb-4">{singleProduct?.description}</p>
 
                     {/* Additional information */}

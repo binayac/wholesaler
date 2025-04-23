@@ -6,7 +6,8 @@ const initialState = {
   totalPrice: 0,
   tax: 0,
   taxRate: 0.05,
-  grandTotal: 0
+  grandTotal: 0,
+  userRole: 'regular' // default value
 }
 
 const cartSlice = createSlice({
@@ -14,16 +15,19 @@ const cartSlice = createSlice({
   initialState,
   reducers: {
     addToCart: (state, action) => {
-      // Check if using _id or id for consistency
-      const productId = action.payload._id || action.payload.id;
-      const isExist = state.products.find((product) => 
-        (product._id === productId) || (product.id === productId)
+      const { product, userRole } = action.payload;
+    
+      // Update role in cart state
+      state.userRole = userRole || 'regular';
+    
+      const productId = product._id || product.id;
+      const isExist = state.products.find((p) =>
+        (p._id === productId) || (p.id === productId)
       );
-      
+    
       if (!isExist) {
-        // Store both id and _id to prevent inconsistencies
         state.products.push({
-          ...action.payload, 
+          ...product,
           id: productId,
           _id: productId,
           quantity: 1
@@ -31,12 +35,13 @@ const cartSlice = createSlice({
       } else {
         console.log("Item already added");
       }
-
+    
       state.selectedItems = setSelectedItems(state);
       state.totalPrice = setTotalPrice(state);
       state.tax = setTax(state);
       state.grandTotal = setGrandTotal(state);
     },
+    
     
     updateQuantity: (state, action) => {
       const { id, type } = action.payload;
@@ -87,19 +92,20 @@ const cartSlice = createSlice({
 });
 
 // Utility functions
-export const setSelectedItems = (state) => state.products.reduce((total, product) => {
-  return Number(total + product.quantity);
-}, 0);
+export const setSelectedItems = (state) =>
+  state.products.reduce((total, product) => total + product.quantity, 0);
 
-export const setTotalPrice = (state) => state.products.reduce((total, product) => {
-  return Number(total + product.quantity * product.price);
-}, 0);
+export const setTotalPrice = (state) =>
+  state.products.reduce((total, product) => {
+    const price = state.userRole === 'wholesaler' && product.wholesalerPrice
+      ? product.wholesalerPrice
+      : product.price;
+    return total + product.quantity * price;
+  }, 0);
 
 export const setTax = (state) => setTotalPrice(state) * state.taxRate;
 
-export const setGrandTotal = (state) => {
-  return setTotalPrice(state) + setTotalPrice(state) * state.taxRate;
-};
+export const setGrandTotal = (state) => setTotalPrice(state) + setTax(state);
 
 export const { addToCart, updateQuantity, removeFromCart, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;

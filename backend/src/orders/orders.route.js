@@ -8,23 +8,29 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 //create checkout session
 router.post("/create-checkout-session", async(req, res) => {
-    const {products} = req.body
+    const { products, userRole } = req.body;
 
     try {
-        const lineItems = products.map((product) => ({
-            price_data: {
-                currency: "usd",
-                product_data: {
-                    name: product.name,
-                    images: [product.image],
-                    metadata: {
-                        mongoDbId: product._id // Store your MongoDB ID here
-                    }
+        const lineItems = products.map((product) => {
+            const priceToUse = userRole === "wholesaler" && product.wholesalerPrice
+                ? product.wholesalerPrice
+                : product.price;
+        
+            return {
+                price_data: {
+                    currency: "usd",
+                    product_data: {
+                        name: product.name,
+                        images: [product.image],
+                        metadata: {
+                            mongoDbId: product._id // Optional: for linking back
+                        }
+                    },
+                    unit_amount: Math.round(priceToUse * 100)
                 },
-                unit_amount: Math.round(product.price * 100)
-            },
-            quantity: product.quantity
-        }))
+                quantity: product.quantity
+            };
+        });
 
         // Store MongoDB product details in the session metadata
         const productMetadata = products.map(product => ({
