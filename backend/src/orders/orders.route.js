@@ -9,28 +9,34 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 //create checkout session
 router.post("/create-checkout-session", async (req, res) => {
-    const { products, userRole, userId } = req.body;
+    const { products, userRole, userId, grandTotal } = req.body;
 
     try {
-        // Fetch the user from the database to get totalSpent
         const user = await User.findById(userId);
+        
+        // Calculate the total from products to verify against frontend
+        const calculatedTotal = products.reduce((total, product) => {
+            const price = userRole === "wholesaler" && product.wholesalerPrice 
+                ? product.wholesalerPrice 
+                : product.price;
+            return total + (price * product.quantity);
+        }, 0);
 
-        // Initialize discount variable
-        let discount = 0;
+        // Calculate the discount percentage that was applied on frontend
+        const frontendDiscount = calculatedTotal - grandTotal;
+        const discountRate = frontendDiscount > 0 ? frontendDiscount / calculatedTotal : 0;
 
-        // If the user is a wholesaler and has spent above the threshold, apply a discount
-        if (userRole === 'wholesaler' && user.totalSpent >= 200) { // Threshold example: $1000
-            discount = 0.1; // 10% discount
-        }
-
-        // Map through products and calculate the price to use
+        // Prepare line items with consistent pricing
         const lineItems = products.map((product) => {
-            const priceToUse = userRole === "wholesaler" && product.wholesalerPrice
+            // Get base price based on user role
+            const basePrice = userRole === "wholesaler" && product.wholesalerPrice
                 ? product.wholesalerPrice
                 : product.price;
 
-            // Apply discount if applicable
-            const finalPrice = priceToUse * (1 - discount);
+            // Apply the same discount rate that was used on frontend
+            const finalPrice = discountRate > 0 
+                ? basePrice * (1 - discountRate)
+                : basePrice;
 
             return {
                 price_data: {
@@ -39,7 +45,9 @@ router.post("/create-checkout-session", async (req, res) => {
                         name: product.name,
                         images: [product.image],
                         metadata: {
-                            mongoDbId: product._id // Optional: for linking back
+                            id: product._id,
+                            originalPrice: basePrice,
+                            discountApplied: discountRate > 0 ? `${discountRate * 100}%` : 'none'
                         }
                     },
                     unit_amount: Math.round(finalPrice * 100) // Convert to cents
@@ -48,39 +56,56 @@ router.post("/create-checkout-session", async (req, res) => {
             };
         });
 
-        // Store MongoDB product details in the session metadata
-        const productMetadata = products.map(product => ({
-            id: product._id,
-        }));
+        // Verify the Stripe total matches the frontend grandTotal
+        const stripeCalculatedTotal = lineItems.reduce((total, item) => {
+            return total + (item.price_data.unit_amount * item.quantity);
+        }, 0) / 100; // Convert back to dollars
 
-        // Create the checkout session
+        if (Math.abs(stripeCalculatedTotal - grandTotal) > 0.01) {
+            console.warn(`Price mismatch! Frontend: $${grandTotal}, Stripe: $${stripeCalculatedTotal}`);
+            // You might want to handle this discrepancy in production
+        }
+
+        // Create metadata with all relevant information
+        const metadata = {
+            userId: userId,
+            userRole: userRole,
+            originalTotal: calculatedTotal.toFixed(2),
+            discountAmount: frontendDiscount.toFixed(2),
+            discountPercentage: (discountRate * 100).toFixed(2),
+            grandTotal: grandTotal.toFixed(2),
+            productCount: products.length.toString()
+        };
+
+        // Get client URL from environment
+        const clientUrl = process.env.CLIENT_URL || 'http://localhost:5173';
+
+        // Create Stripe session
         const session = await stripe.checkout.sessions.create({
             payment_method_types: ["card"],
             line_items: lineItems,
             mode: "payment",
-            success_url: `http://localhost:5173/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `http://localhost:5173/cancel`,
-            metadata: {
-                productDetails: JSON.stringify(productMetadata)
+            success_url: `${clientUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `${clientUrl}/cart`,
+            metadata: metadata,
+            payment_intent_data: {
+                description: `Order for ${user.username} (${userRole})`,
+                metadata: metadata
             }
         });
 
-        // Optionally update the user's totalSpent after the order is successful
-        const orderTotal = products.reduce((acc, product) => {
-            const priceToUse = product.wholesalerPrice || product.price;
-            const finalPrice = priceToUse * (1 - discount);
-            return acc + finalPrice * product.quantity;
-        }, 0);
-
-        // Update user's totalSpent field
-        user.totalSpent += orderTotal;
-        await user.save(); // Save the updated user data
-
-        res.json({ id: session.id });
+        res.json({ 
+            id: session.id,
+            amount_total: stripeCalculatedTotal, // For verification
+            frontend_total: grandTotal // For verification
+        });
 
     } catch (error) {
-        console.error("Error creating checkout session", error);
-        res.status(500).send({ message: "Failed to create checkout session" });
+        console.error("Error creating checkout session:", error);
+        res.status(500).json({ 
+            message: "Failed to create checkout session",
+            error: error.message 
+        });
     }
 });
 

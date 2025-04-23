@@ -4,12 +4,14 @@ const initialState = {
   products: [],
   selectedItems: 0,
   totalPrice: 0,
+  subtotalAfterDiscount: 0,
+  discountAmount: 0,
   tax: 0,
   taxRate: 0.05,
   grandTotal: 0,
-  userRole: 'regular', // default value
-  discountApplied: false, // Track if a discount has been applied
-  discountMessage: '', // Message for the discount
+  userRole: 'regular',
+  discountApplied: false,
+  discountMessage: '',
 };
 
 const cartSlice = createSlice({
@@ -18,15 +20,13 @@ const cartSlice = createSlice({
   reducers: {
     addToCart: (state, action) => {
       const { product, userRole } = action.payload;
-    
-      // Update role in cart state
       state.userRole = userRole || 'regular';
-    
+      
       const productId = product._id || product.id;
       const isExist = state.products.find((p) =>
         (p._id === productId) || (p.id === productId)
       );
-    
+      
       if (!isExist) {
         state.products.push({
           ...product,
@@ -34,22 +34,14 @@ const cartSlice = createSlice({
           _id: productId,
           quantity: 1
         });
-      } else {
-        console.log("Item already added");
       }
-    
-      state.selectedItems = setSelectedItems(state);
-      state.totalPrice = setTotalPrice(state);
-      state.tax = setTax(state);
-      state.grandTotal = setGrandTotal(state);
-      // Check if discount should be applied after adding to cart
-      checkDiscount(state);
+      
+      updateCartTotals(state);
+      checkForDiscounts(state); // Call directly without dispatch
     },
 
     updateQuantity: (state, action) => {
       const { id, type } = action.payload;
-      
-      // Find product checking both possible ID fields
       const productToUpdate = state.products.find(product => 
         (product.id === id) || (product._id === id)
       );
@@ -57,64 +49,88 @@ const cartSlice = createSlice({
       if (productToUpdate) {
         if (type === "increment") {
           productToUpdate.quantity += 1;
-        } else if (type === "decrement") {
-          if (productToUpdate.quantity > 1) {
-            productToUpdate.quantity -= 1;
-          }
+        } else if (type === "decrement" && productToUpdate.quantity > 1) {
+          productToUpdate.quantity -= 1;
         }
       }
 
-      state.selectedItems = setSelectedItems(state);
-      state.totalPrice = setTotalPrice(state);
-      state.tax = setTax(state);
-      state.grandTotal = setGrandTotal(state);
-      // Check if discount should be applied after updating quantity
-      checkDiscount(state);
+      updateCartTotals(state);
+      checkForDiscounts(state); // Call directly without dispatch
     },
     
     removeFromCart: (state, action) => {
       const id = action.payload;
-      
-      // Filter out the product with matching id or _id
       state.products = state.products.filter(product => 
         (product.id !== id) && (product._id !== id)
       );
-      
-      state.selectedItems = setSelectedItems(state);
-      state.totalPrice = setTotalPrice(state);
-      state.tax = setTax(state);
-      state.grandTotal = setGrandTotal(state);
-      // Check if discount should be applied after removing an item
-      checkDiscount(state);
+      updateCartTotals(state);
+      checkForDiscounts(state); // Call directly without dispatch
     },
     
     clearCart: (state) => {
       state.products = [];
-      state.selectedItems = 0;
-      state.totalPrice = 0;
-      state.tax = 0;
-      state.grandTotal = 0;
+      updateCartTotals(state);
+      // Reset discount when cart is cleared
       state.discountApplied = false;
       state.discountMessage = '';
+      state.discountAmount = 0;
     },
     
     applyDiscount: (state, action) => {
+      const { discountRate, message } = action.payload;
       state.discountApplied = true;
-      state.discountMessage = action.payload;
+      state.discountMessage = message;
+      state.discountAmount = state.totalPrice * discountRate;
+      updateCartTotals(state);
     },
     
     removeDiscount: (state) => {
       state.discountApplied = false;
       state.discountMessage = '';
+      state.discountAmount = 0;
+      updateCartTotals(state);
     }
   },
 });
 
+// Helper function to update all cart totals
+const updateCartTotals = (state) => {
+  state.selectedItems = calculateSelectedItems(state);
+  state.totalPrice = calculateTotalPrice(state);
+  
+  // Apply discount if applicable
+  state.subtotalAfterDiscount = state.discountApplied 
+    ? state.totalPrice - state.discountAmount 
+    : state.totalPrice;
+  
+  state.tax = calculateTax(state);
+  state.grandTotal = calculateGrandTotal(state);
+};
+
+// Check for applicable discounts
+const checkForDiscounts = (state) => {
+  // Check for wholesaler spending threshold
+  if (state.userRole === 'wholesaler' && state.totalPrice >= 100) {
+    // Apply discount directly instead of dispatching
+    state.discountApplied = true;
+    state.discountMessage = '10% discount applied for wholesalers!';
+    state.discountAmount = state.totalPrice * 0.1;
+  } else if (state.discountApplied) {
+    // Remove discount directly
+    state.discountApplied = false;
+    state.discountMessage = '';
+    state.discountAmount = 0;
+  }
+  
+  // Update totals after changing discount
+  updateCartTotals(state);
+};
+
 // Utility functions
-export const setSelectedItems = (state) =>
+const calculateSelectedItems = (state) =>
   state.products.reduce((total, product) => total + product.quantity, 0);
 
-export const setTotalPrice = (state) =>
+const calculateTotalPrice = (state) =>
   state.products.reduce((total, product) => {
     const price = state.userRole === 'wholesaler' && product.wholesalerPrice
       ? product.wholesalerPrice
@@ -122,24 +138,17 @@ export const setTotalPrice = (state) =>
     return total + product.quantity * price;
   }, 0);
 
-export const setTax = (state) => setTotalPrice(state) * state.taxRate;
+const calculateTax = (state) => state.subtotalAfterDiscount * state.taxRate;
 
-export const setGrandTotal = (state) => setTotalPrice(state) + setTax(state);
+const calculateGrandTotal = (state) => state.subtotalAfterDiscount + state.tax;
 
-// Check if discount applies based on your conditions (e.g., cart total)
-export const checkDiscount = (state) => {
-  if (state.totalPrice >= 100) { // Example condition (e.g., total >= 100)
-    if (!state.discountApplied) {
-      state.discountApplied = true;
-      state.discountMessage = 'Discount applied: You get a 10% discount!';
-    }
-  } else {
-    if (state.discountApplied) {
-      state.discountApplied = false;
-      state.discountMessage = 'Add more items to your cart to receive a discount!';
-    }
-  }
-};
+export const { 
+  addToCart, 
+  updateQuantity, 
+  removeFromCart, 
+  clearCart, 
+  applyDiscount, 
+  removeDiscount 
+} = cartSlice.actions;
 
-export const { addToCart, updateQuantity, removeFromCart, clearCart, applyDiscount, removeDiscount } = cartSlice.actions;
 export default cartSlice.reducer;
