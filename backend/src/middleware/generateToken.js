@@ -2,15 +2,25 @@ const jwt = require('jsonwebtoken');
 const User = require('../users/user.model');
 const JWT_SECRET = process.env.JWT_SECRET_KEY;
 
-const generateToken = async(userId) => {
-    try{
+const generateToken = async (userId, type = 'auth') => {
+    try {
         const user = await User.findById(userId);
-        if(!user) {
+        if (!user) {
             throw new Error("User not found.");
         }
-        const token = jwt.sign({userId: user._id, role: user.role}, JWT_SECRET, {expiresIn: "1h"});
-        return token
-    } catch {}
-}
+        const payload = { userId: user._id, role: user.role };
+        const expiry = type === 'verification' ? '24h' : '1h';
+        const token = jwt.sign(payload, JWT_SECRET, { expiresIn: expiry });
+        
+        if (type === 'verification') {
+            user.verificationToken = token;
+            await user.save();
+        }
+        
+        return token;
+    } catch (error) {
+        throw new Error("Error generating token: " + error.message);
+    }
+};
 
 module.exports = generateToken;

@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react"
-import { getBaseUrl } from "../../../utils/baseURL"
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { getBaseUrl } from "../../../utils/baseURL";
 
 const authApi = createApi({
     reducerPath: 'authApi',
@@ -45,10 +45,10 @@ const authApi = createApi({
             invalidatesTags: ["User"],
         }),
         updateUserRole: builder.mutation({
-            query: ({userId, role}) => ({
+            query: ({ userId, role }) => ({
                 url: `/users/${userId}`,
                 method: "PUT",
-                body: {role}
+                body: { role }
             }),
             refetchOnMount: true,
             invalidatesTags: ["User"],
@@ -73,10 +73,37 @@ const authApi = createApi({
                 method: 'PATCH',
                 body: { status },
             }),
-            invalidatesTags: ['Wholesalers'], // If you're using tag-based cache invalidation
+            invalidatesTags: ['Wholesalers'],
+        }),
+        resendVerification: builder.mutation({
+            query: (data) => ({
+                url: "/resend-verification",
+                method: "POST",
+                body: data
+            })
+        }),
+        verifyEmail: builder.mutation({
+            query: (data) => ({
+                url: "/verify-email",
+                method: "GET",
+                params: data // Send token as query parameter
+            })
         }),
     }),
-})
+});
 
-export const {useRegisterUserMutation, useLoginUserMutation, useLogoutUserMutation, useGetUserQuery, useDeleteUserMutation, useUpdateUserRoleMutation, useEditProfileMutation, useGetPendingWholesalersQuery, useApproveWholesalerMutation} = authApi
-export default authApi
+export const {
+    useRegisterUserMutation,
+    useLoginUserMutation,
+    useLogoutUserMutation,
+    useGetUserQuery,
+    useDeleteUserMutation,
+    useUpdateUserRoleMutation,
+    useEditProfileMutation,
+    useGetPendingWholesalersQuery,
+    useApproveWholesalerMutation,
+    useResendVerificationMutation,
+    useVerifyEmailMutation
+} = authApi;
+
+export default authApi;

@@ -26,6 +26,7 @@ import ViewOrder from "../pages/dashboard/admin/manageOrders/ViewOrder";
 import Checkout from "../components/Checkout";
 import ApproveWholesalers from "../pages/dashboard/admin/wholesalers/ApproveWholesalers";
 import ManageWholesalers from "../pages/dashboard/admin/wholesalers/ManageWholesalers";
+import VerifyEmail from "../components/VerifyEmail";
 
 const router = createBrowserRouter([
     {
@@ -59,6 +60,10 @@ const router = createBrowserRouter([
     {
       path:"/register",
       element: <Register />
+    },
+    {
+      path:"/verify-email",
+      element: <VerifyEmail />
     },
 
     //dashboard routes starts here

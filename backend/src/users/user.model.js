@@ -25,6 +25,8 @@ const userSchema = new Schema({
         enum: ['pending', 'approved', 'rejected'], 
         default: 'pending'
     },
+    isEmailVerified: { type: Boolean, default: false },
+    verificationToken: { type: String }, // New field for verification token
     totalSpent: { type: Number, default: 0 }  // Add the totalSpent field
 });
 
