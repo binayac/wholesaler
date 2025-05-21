@@ -28,12 +28,9 @@ router.post("/create-checkout-session", async (req, res) => {
 
         // Prepare line items with consistent pricing
         const lineItems = products.map((product) => {
-            // Get base price based on user role
             const basePrice = userRole === "wholesaler" && product.wholesalerPrice
                 ? product.wholesalerPrice
                 : product.price;
-
-            // Apply the same discount rate that was used on frontend
             const finalPrice = discountRate > 0 
                 ? basePrice * (1 - discountRate)
                 : basePrice;
@@ -45,7 +42,7 @@ router.post("/create-checkout-session", async (req, res) => {
                         name: product.name,
                         images: [product.image],
                         metadata: {
-                            id: product._id,
+                            id: product._id.toString(), // Ensure string ID
                             originalPrice: basePrice,
                             discountApplied: discountRate > 0 ? `${discountRate * 100}%` : 'none'
                         }
@@ -59,12 +56,20 @@ router.post("/create-checkout-session", async (req, res) => {
         // Verify the Stripe total matches the frontend grandTotal
         const stripeCalculatedTotal = lineItems.reduce((total, item) => {
             return total + (item.price_data.unit_amount * item.quantity);
-        }, 0) / 100; // Convert back to dollars
+        }, 0) / 100;
 
         if (Math.abs(stripeCalculatedTotal - grandTotal) > 0.01) {
             console.warn(`Price mismatch! Frontend: $${grandTotal}, Stripe: $${stripeCalculatedTotal}`);
-            // You might want to handle this discrepancy in production
         }
+
+        // Create productDetails for metadata
+        const productDetails = products.map(product => ({
+            id: product._id.toString(),
+            name: product.name,
+            price: userRole === "wholesaler" && product.wholesalerPrice ? product.wholesalerPrice : product.price,
+            image: product.image,
+            quantity: product.quantity
+        }));
 
         // Create metadata with all relevant information
         const metadata = {
@@ -74,7 +79,8 @@ router.post("/create-checkout-session", async (req, res) => {
             discountAmount: frontendDiscount.toFixed(2),
             discountPercentage: (discountRate * 100).toFixed(2),
             grandTotal: grandTotal.toFixed(2),
-            productCount: products.length.toString()
+            productCount: products.length.toString(),
+            productDetails: JSON.stringify(productDetails) // Add productDetails
         };
 
         // Get client URL from environment
@@ -96,8 +102,8 @@ router.post("/create-checkout-session", async (req, res) => {
 
         res.json({ 
             id: session.id,
-            amount_total: stripeCalculatedTotal, // For verification
-            frontend_total: grandTotal // For verification
+            amount_total: stripeCalculatedTotal,
+            frontend_total: grandTotal
         });
 
     } catch (error) {
@@ -112,6 +118,11 @@ router.post("/create-checkout-session", async (req, res) => {
 //confirm payment
 router.post("/confirm-payment", async (req, res) => {
     const { session_id } = req.body;
+
+    if (!session_id) {
+        return res.status(400).send({ message: "Missing session_id" });
+    }
+
     try {
         const session = await stripe.checkout.sessions.retrieve(session_id, {
             expand: ["line_items", "payment_intent"]
@@ -122,33 +133,53 @@ router.post("/confirm-payment", async (req, res) => {
 
         if (!order) {
             // Get product details from session metadata
-            const productDetails = JSON.parse(session.metadata.productDetails || '[]');
-            const productIds = productDetails.map(p => p.id);
+            let productDetails;
+            try {
+                productDetails = JSON.parse(session.metadata.productDetails || '[]');
+            } catch (error) {
+                console.error("Failed to parse productDetails:", error);
+                productDetails = [];
+            }
+            console.log("Product Details from Metadata:", productDetails);
+
+            const productIds = productDetails.map(p => p.id).filter(id => id);
+            console.log("Product IDs:", productIds);
 
             // Fetch full product info from DB
             const productsFromDB = await Products.find({ _id: { $in: productIds } });
+            console.log("Products from DB:", productsFromDB);
 
             // Map line items with quantity and product details
             const orderProducts = session.line_items.data.map(item => {
-                // Find corresponding product in our metadata
                 const quantity = item.quantity;
                 const stripeProductId = item.price.product;
                 const stripeProductName = item.description;
+                const productMetadata = item.price.product.metadata || {};
+                const dbProductId = productMetadata.id;
 
-                // Find the matching product from our database
-                const matchingProduct = productsFromDB.find(p => p.name === stripeProductName);
+                console.log("Stripe Product Name:", stripeProductName);
+                console.log("Stripe Product Metadata ID:", dbProductId);
+
+                let matchingProduct = dbProductId 
+                    ? productsFromDB.find(p => p._id.toString() === dbProductId)
+                    : null;
+
+                if (!matchingProduct) {
+                    console.log(`No DB match for ID ${dbProductId}, checking productDetails`);
+                    matchingProduct = productDetails.find(p => p.id === dbProductId || p.name === stripeProductName);
+                }
 
                 if (matchingProduct) {
                     return {
-                        productId: matchingProduct.id,
+                        productId: matchingProduct._id || matchingProduct.id,
                         name: matchingProduct.name,
-                        price: matchingProduct.price,
-                        image: matchingProduct.image,
+                        price: matchingProduct.price || (item.amount_total / 100) / quantity,
+                        image: matchingProduct.image || item.images,
                         quantity: quantity
                     };
                 }
 
-                // Fallback if no match found
+                console.log(`Using fallback for ${stripeProductName}`);
                 return {
                     productId: stripeProductId,
                     quantity: quantity,
@@ -165,19 +196,21 @@ router.post("/confirm-payment", async (req, res) => {
                 amount,
                 products: orderProducts,
                 email: session.customer_details.email,
-                status: session.payment_intent.status === "succeeded" ? "pending" : "failed"
+                status: session.payment_intent.status === "succeeded" ? "pending" : "failed",
+                paymentStatus: session.payment_intent.status === "succeeded" ? "completed" : "failed"
             });
         } else {
-            // Prevent overwriting order status if it's already completed or processing
+            // Update paymentStatus and order status if not completed or shipped
             if (order.status !== "completed" && order.status !== "shipped") {
                 order.status = session.payment_intent.status === "succeeded" ? "processing" : "failed";
+                order.paymentStatus = session.payment_intent.status === "succeeded" ? "completed" : "failed";
             }
         }
 
         await order.save();
         res.json(order);
     } catch (error) {
-        console.error("Error confirming payment", error);
+        console.error("Error confirming payment:", error);
         res.status(500).send({ message: "Failed to confirm payment" });
     }
 });

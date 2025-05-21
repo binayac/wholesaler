@@ -1,25 +1,41 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useUpdateOrderStatusMutation } from '../../../../redux/features/orders/orderApi';
 
-const UpdateOrderModal = ({order, isOpen, onClose}) => {
+const UpdateOrderModal = ({ order, isOpen, onClose }) => {
     const [status, setStatus] = useState(order?.status);
+    const [availableStatuses, setAvailableStatuses] = useState([]);
 
-    const [updateOrderStatus, {isLoading, error}] = useUpdateOrderStatusMutation();
+    const [updateOrderStatus, { isLoading, error }] = useUpdateOrderStatusMutation();
 
-    const handleUpdateOrderStatus = async ()=> {
+    // Define valid status transitions
+    const statusFlow = ['pending', 'processing', 'shipped', 'completed'];
+
+    // Update available statuses based on current order status
+    useEffect(() => {
+        if (order?.status) {
+            const currentIndex = statusFlow.indexOf(order.status);
+            const validStatuses = [];
+            if (currentIndex > 0) validStatuses.push(statusFlow[currentIndex - 1]); // Previous status
+            validStatuses.push(statusFlow[currentIndex]); // Current status
+            if (currentIndex < statusFlow.length - 1) validStatuses.push(statusFlow[currentIndex + 1]); // Next status
+            setAvailableStatuses(validStatuses);
+            setStatus(order.status); // Reset to current status when order changes
+        }
+    }, [order?.status]);
+
+    const handleUpdateOrderStatus = async () => {
         try {
-            // Make sure to use order.orderId instead of _id if you are using orderId in your database
-            await updateOrderStatus({id: order?.orderId, status});
+            await updateOrderStatus({ id: order?.orderId, status }).unwrap();
             onClose();
         } catch (error) {
             console.error("Failed to update order status:", error);
         }
-    }
-    console.log("Updating order with ID:", order?.orderId);
+    };
 
-    if(!isOpen) return null;
-  return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80">
+    if (!isOpen) return null;
+
+    return (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-80">
             <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
                 <h2 className="text-xl font-semibold mb-4">Update Order Status</h2>
                 
@@ -31,14 +47,15 @@ const UpdateOrderModal = ({order, isOpen, onClose}) => {
                         onChange={(e) => setStatus(e.target.value)}
                         className="border border-gray-300 p-2 rounded w-full"
                     >
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="shipped">Shipped</option>
-                        <option value="completed">Completed</option>
+                        {availableStatuses.map((statusOption) => (
+                            <option key={statusOption} value={statusOption}>
+                                {statusOption.charAt(0).toUpperCase() + statusOption.slice(1)}
+                            </option>
+                        ))}
                     </select>
                 </div>
                 
-                {error && <p className="text-red-500 mb-4">Failed to update status.</p>}
+                {error && <p className="text-red-500 mb-4">{error?.data?.message || 'Failed to update status.'}</p>}
                 
                 <div className="flex justify-end space-x-2">
                     <button
@@ -57,7 +74,7 @@ const UpdateOrderModal = ({order, isOpen, onClose}) => {
                 </div>
             </div>
         </div>
-  )
-}
+    );
+};
 
-export default UpdateOrderModal
+export default UpdateOrderModal;

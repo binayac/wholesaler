@@ -6,26 +6,88 @@ import TestimonialSlider from "./TestimonialSlider";
 
 const Register = () => {
   const [message, setMessage] = useState("");
-  const [role, setRole] = useState(""); // Initialize empty to match select
+  const [role, setRole] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [businessLicense, setBusinessLicense] = useState("");
   const [taxId, setTaxId] = useState("");
+  const [errors, setErrors] = useState({}); // New state for field-specific errors
 
   const [registerUser, { isLoading }] = useRegisterUserMutation();
   const [resendVerification, { isLoading: isResending }] = useResendVerificationMutation();
 
+  // Validation functions
+  const validateUsername = (username) => {
+    if (!username) return 'Username is required.';
+    if (username.includes(' ')) return 'Username cannot contain spaces.';
+    if (!/^[a-zA-Z0-9_-]+$/.test(username)) return 'Username can only contain letters, numbers, underscores, or hyphens.';
+    return '';
+  };
+
+  const validatePassword = (password) => {
+    if (!password) return 'Password is required.';
+    if (!/^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/.test(password)) {
+      return 'Password must be at least 8 characters long and include at least one uppercase letter, one number, and one special character (!@#$%^&*).';
+    }
+    return '';
+  };
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    if (name === 'username') {
+      setUsername(value);
+      setErrors((prev) => ({ ...prev, username: validateUsername(value) }));
+    } else if (name === 'email') {
+      setEmail(value);
+      setErrors((prev) => ({ ...prev, email: value ? '' : 'Email is required.' }));
+    } else if (name === 'password') {
+      setPassword(value);
+      setErrors((prev) => ({ ...prev, password: validatePassword(value) }));
+    } else if (name === 'businessName') {
+      setBusinessName(value);
+    } else if (name === 'businessLicense') {
+      setBusinessLicense(value);
+    } else if (name === 'taxId') {
+      setTaxId(value);
+    } else if (name === 'role') {
+      setRole(value);
+    }
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     setMessage("");
+    setErrors({});
+
+    // Client-side validation
+    const usernameError = validateUsername(username);
+    const emailError = !email ? 'Email is required.' : '';
+    const passwordError = validatePassword(password);
+    const roleError = !role ? 'Please select a role.' : '';
+    const wholesalerErrors = role === 'wholesaler' ? {
+      businessName: !businessName ? 'Business Name is required.' : '',
+      businessLicense: !businessLicense ? 'Business License is required.' : '',
+      taxId: !taxId ? 'Tax ID is required.' : ''
+    } : {};
+
+    if (usernameError || emailError || passwordError || roleError || Object.values(wholesalerErrors).some((err) => err)) {
+      setErrors({
+        username: usernameError,
+        email: emailError,
+        password: passwordError,
+        role: roleError,
+        ...wholesalerErrors
+      });
+      return;
+    }
 
     const data = {
       username,
       email,
       password,
-      role: role === "customer" ? "user" : role, // Map 'customer' to 'user' for backend
+      role: role === "customer" ? "user" : role,
     };
 
     if (role === "wholesaler") {
@@ -69,11 +131,13 @@ const Register = () => {
               <input
                 type="text"
                 name="username"
-                onChange={(e) => setUsername(e.target.value)}
+                value={username}
+                onChange={handleChange}
                 placeholder="Username"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
             </div>
 
             {/* Email */}
@@ -81,11 +145,13 @@ const Register = () => {
               <input
                 type="email"
                 name="email"
-                onChange={(e) => setEmail(e.target.value)}
+                value={email}
+                onChange={handleChange}
                 placeholder="Enter your email"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
+              {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
             </div>
 
             {/* Password */}
@@ -93,7 +159,8 @@ const Register = () => {
               <input
                 type="password"
                 name="password"
-                onChange={(e) => setPassword(e.target.value)}
+                value={password}
+                onChange={handleChange}
                 placeholder="Create a password"
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -113,13 +180,14 @@ const Register = () => {
                   <circle cx="12" cy="12" r="3" />
                 </svg>
               </button>
+              {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
             </div>
 
             {/* Role selection */}
             <div>
               <select
                 name="role"
-                onChange={(e) => setRole(e.target.value)}
+                onChange={handleChange}
                 value={role}
                 required
                 className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -128,35 +196,48 @@ const Register = () => {
                 <option value="customer">Customer</option>
                 <option value="wholesaler">Wholesaler</option>
               </select>
+              {errors.role && <p className="text-red-500 text-sm mt-1">{errors.role}</p>}
             </div>
 
             {/* Extra fields for Wholesaler */}
             {role === "wholesaler" && (
               <>
-                <input
-                  type="text"
-                  name="businessName"
-                  onChange={(e) => setBusinessName(e.target.value)}
-                  placeholder="Business Name"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  name="businessLicense"
-                  onChange={(e) => setBusinessLicense(e.target.value)}
-                  placeholder="Business License Number"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <input
-                  type="text"
-                  name="taxId"
-                  onChange={(e) => setTaxId(e.target.value)}
-                  placeholder="Tax ID"
-                  required
-                  className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+                <div>
+                  <input
+                    type="text"
+                    name="businessName"
+                    value={businessName}
+                    onChange={handleChange}
+                    placeholder="Business Name"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.businessName && <p className="text-red-500 text-sm mt-1">{errors.businessName}</p>}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    name="businessLicense"
+                    value={businessLicense}
+                    onChange={handleChange}
+                    placeholder="Business License Number"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.businessLicense && <p className="text-red-500 text-sm mt-1">{errors.businessLicense}</p>}
+                </div>
+                <div>
+                  <input
+                    type="text"
+                    name="taxId"
+                    value={taxId}
+                    onChange={handleChange}
+                    placeholder="Tax ID"
+                    required
+                    className="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {errors.taxId && <p className="text-red-500 text-sm mt-1">{errors.taxId}</p>}
+                </div>
               </>
             )}
 

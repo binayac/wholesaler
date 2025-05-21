@@ -2,6 +2,7 @@ import { useDispatch } from "react-redux";
 import { useLogoutUserMutation } from "../../redux/features/auth/authApi";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { logout } from "../../redux/features/auth/authSlice";
+import { toast } from "react-toastify";
 
 const navItems = [
   {path: '/dashboard/admin', label: 'Dashboard'},
@@ -20,7 +21,8 @@ const AdminDashboard = () => {
   const handleLogout = async () => {
       try {
           await logoutUser().unwrap()
-          alert("Logged out successfully")
+          toast.info("Logged out successfully!");
+        //   alert("Logged out successfully")
           dispatch(logout())
           navigate('/')
       } catch (error) {

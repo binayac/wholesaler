@@ -86,7 +86,7 @@ const authApi = createApi({
             query: (data) => ({
                 url: "/verify-email",
                 method: "GET",
-                params: data // Send token as query parameter
+                params: data
             })
         }),
     }),
